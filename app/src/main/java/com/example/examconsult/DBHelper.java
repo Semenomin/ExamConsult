@@ -20,13 +20,15 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 6;
     private static final String DATABASE_NAME = "exactest.db";
 
     private static final String TABLE_NAME_USER = "users";
@@ -69,10 +71,10 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS "+TABLE_NAME_FORUM+" ("+
                         " "+KEY_ID_FORUM+" INTEGER PRIMARY KEY AUTOINCREMENT,"+
                         " "+KEY_CREATED_AT_FORUM+" TEXT NOT NULL,"+
-                        " "+KEY_AUTHOR_ID_FORUM+" TEXT NOT NULL,"+
-                        " "+KEY_TITLE_FORUM+" TEXT UNIQUE NOT NULL,"+
+                        " "+KEY_AUTHOR_ID_FORUM+" INTEGER NOT NULL,"+
+                        " "+KEY_TITLE_FORUM+" TEXT NOT NULL,"+
                         " "+KEY_DESCRIPTION_FORUM+" TEXT NOT NULL,"+
-                        " "+KEY_COMMENT_ID_FORUM+" INTEGER,"+
+                        " "+KEY_COMMENT_ID_FORUM+" INTEGER ,"+
                         " FOREIGN KEY("+KEY_AUTHOR_ID_FORUM+") REFERENCES users("+KEY_ID_USER+")"+
                         " )");
 
@@ -113,8 +115,14 @@ public class DBHelper extends SQLiteOpenHelper {
                     contentValues.put(KEY_LOGIN_USER, login);
                     contentValues.put(KEY_PASSWORD_USER, pass);
                     contentValues.put(KEY_ISADMIN_USER,isAdmin);
-                    database.insert(TABLE_NAME_USER, null, contentValues);
-                    Toast.makeText(ctx, "Registration success", Toast.LENGTH_LONG).show();
+                    if (database.insert(TABLE_NAME_USER, null, contentValues) == -1)
+                    {
+                        Toast.makeText(ctx, "Registration error, please enter valid login and pass", Toast.LENGTH_LONG).show();
+                    }
+                    else
+                    {
+                        Toast.makeText(ctx, "Registration success", Toast.LENGTH_LONG).show();
+                    }
                 }
                 else Toast.makeText(ctx, "Password is less than 4 symbols", Toast.LENGTH_LONG).show();
             }
@@ -166,16 +174,16 @@ public class DBHelper extends SQLiteOpenHelper {
     void signIn(String password, String login,Context ctx) throws NoSuchAlgorithmException {
         SQLiteDatabase db = getReadableDatabase();
         Cursor query =  db.rawQuery("select * from "+TABLE_NAME_USER+" where "+KEY_LOGIN_USER+" LIKE \'"+login+"\';",null);
-        Log.d("LOG","select * from "+TABLE_NAME_USER+" where "+KEY_LOGIN_USER+" = "+login+";");
         if(query.moveToFirst() && query.getCount() != 0){
-            Log.d("LOG","something");
             int id = query.getInt(0);
             String pass = query.getString(2);
             byte[] salt = readFile(ctx);
             if(salt != null){
                 String pass_input = new String(getHash(salt,password));
                 if(pass.equals(pass_input)){
-                    ctx.startActivity(new Intent(ctx, MainActivity.class));
+                    Intent intent = new Intent(ctx, MainActivity.class);
+                    intent.putExtra("id_user",id);
+                    ctx.startActivity(intent);
                 }
                 else Toast.makeText(ctx, "Incorrect password", Toast.LENGTH_LONG).show();
             }
@@ -196,5 +204,45 @@ public class DBHelper extends SQLiteOpenHelper {
             }
             while(query.moveToNext());
         }
+    }
+
+    String getAuthor(int id){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor query = db.rawQuery("select * from "+TABLE_NAME_USER+" where "+KEY_ID_USER+" like "+id,null);
+        if(query.moveToFirst() && query.getCount() != 0){
+            return query.getString(1);
+        }
+        else return "Anonim";
+    }
+
+    List<Forum> getForums(){
+        List<Forum> forums = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor query =  db.rawQuery("select * from "+TABLE_NAME_FORUM,null);
+        if(query.moveToFirst()){
+            do{
+                Forum f = new Forum();
+                f.setId(query.getInt(0));
+                f.setCreated_at(query.getString(1));
+                f.setAuthor_id(query.getInt(2));
+                f.setTitle(query.getString(3));
+                f.setDesc(query.getString(4));
+                f.setComment_id(query.getInt(5));
+                forums.add(f);
+            }
+            while(query.moveToNext());
+        }
+        return forums;
+    }
+
+    void newForum(String desc,int comm_id,String date, String title, int author_id){
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(KEY_DESCRIPTION_FORUM, desc);
+        contentValues.put(KEY_COMMENT_ID_FORUM, comm_id);
+        contentValues.put(KEY_CREATED_AT_FORUM, date);
+        contentValues.put(KEY_TITLE_FORUM, title);
+        contentValues.put(KEY_AUTHOR_ID_FORUM, author_id);
+        db.insert(TABLE_NAME_FORUM, null, contentValues);
     }
 }

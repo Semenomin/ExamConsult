@@ -47,7 +47,7 @@ public class AuthActivity extends AppCompatActivity {
         switch (view.getId()) {
             case R.id.register_btn:
                 if (!login_edit.getText().toString().isEmpty() && !pass_edit.getText().toString().isEmpty()) {
-                    helper.addUser(login,password,1,this);
+                    helper.addUser(login,password,0,this);
                 } else
                     Toast.makeText(getApplicationContext(), "Input data in fields", Toast.LENGTH_LONG).show();
                 break;
@@ -56,7 +56,6 @@ public class AuthActivity extends AppCompatActivity {
                     helper.signIn(password,login,this);
                 } else
                     Toast.makeText(getApplicationContext(), "Input data in fields", Toast.LENGTH_LONG).show();
-
                 break;
         }
     }
