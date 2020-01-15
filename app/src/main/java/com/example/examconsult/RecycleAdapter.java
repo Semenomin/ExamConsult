@@ -48,7 +48,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.ViewHold
         holder.main.setOnClickListener (new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(mainContext, VideoMaterial.class);
+                Intent intent = new Intent(mainContext, ForumArticle.class);
                 intent.putExtra("id_user",user);
                 intent.putExtra("forum",forum.getId());
                 mainContext.startActivity(intent);

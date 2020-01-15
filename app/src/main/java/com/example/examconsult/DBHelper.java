@@ -1,5 +1,6 @@
 package com.example.examconsult;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -20,15 +21,17 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "exactest.db";
 
     private static final String TABLE_NAME_USER = "users";
@@ -50,8 +53,10 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String KEY_COMMENT_ID_COMMENT = "comment";
     private static final String KEY_CREATED_AT_COMMENTS = "created_at";
     private static final String KEY_AUTHOR_ID_COMMENTS = "author_id";
+    private static final String KEY_FORUM_ID_COMMENTS = "forum_id";
 
     private static final String FILE_NAME = "no_password";
+
     private FileOutputStream fos;
     private FileInputStream fis;
 
@@ -71,10 +76,9 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS "+TABLE_NAME_FORUM+" ("+
                         " "+KEY_ID_FORUM+" INTEGER PRIMARY KEY AUTOINCREMENT,"+
                         " "+KEY_CREATED_AT_FORUM+" TEXT NOT NULL,"+
-                        " "+KEY_AUTHOR_ID_FORUM+" INTEGER NOT NULL,"+
-                        " "+KEY_TITLE_FORUM+" TEXT NOT NULL,"+
+                        " "+KEY_AUTHOR_ID_FORUM+" TEXT NOT NULL,"+
+                        " "+KEY_TITLE_FORUM+" TEXT UNIQUE NOT NULL,"+
                         " "+KEY_DESCRIPTION_FORUM+" TEXT NOT NULL,"+
-                        " "+KEY_COMMENT_ID_FORUM+" INTEGER ,"+
                         " FOREIGN KEY("+KEY_AUTHOR_ID_FORUM+") REFERENCES users("+KEY_ID_USER+")"+
                         " )");
 
@@ -83,8 +87,9 @@ public class DBHelper extends SQLiteOpenHelper {
                         " "+KEY_COMMENT_ID_COMMENT+" TEXT UNIQUE NOT NULL," +
                         " "+KEY_CREATED_AT_COMMENTS+" TEXT NOT NULL," +
                         " "+KEY_AUTHOR_ID_COMMENTS+" TEXT NOT NULL," +
+                        " "+KEY_FORUM_ID_COMMENTS+" TEXT NOT NULL," +
                         " FOREIGN KEY("+KEY_AUTHOR_ID_COMMENTS+") REFERENCES users("+KEY_ID_USER+")," +
-                        " FOREIGN KEY("+KEY_ID_COMMENTS+") REFERENCES forum("+KEY_ID_COMMENTS+")" +
+                        " FOREIGN KEY("+KEY_FORUM_ID_COMMENTS+") REFERENCES forum("+KEY_ID_FORUM+")" +
                         " );");
     }
 
@@ -174,7 +179,9 @@ public class DBHelper extends SQLiteOpenHelper {
     void signIn(String password, String login,Context ctx) throws NoSuchAlgorithmException {
         SQLiteDatabase db = getReadableDatabase();
         Cursor query =  db.rawQuery("select * from "+TABLE_NAME_USER+" where "+KEY_LOGIN_USER+" LIKE \'"+login+"\';",null);
+        Log.d("LOG","select * from "+TABLE_NAME_USER+" where "+KEY_LOGIN_USER+" = "+login+";");
         if(query.moveToFirst() && query.getCount() != 0){
+            Log.d("LOG","something");
             int id = query.getInt(0);
             String pass = query.getString(2);
             byte[] salt = readFile(ctx);
@@ -192,18 +199,34 @@ public class DBHelper extends SQLiteOpenHelper {
         else Toast.makeText(ctx, "Incorrect login", Toast.LENGTH_LONG).show();
     }
 
-    void getAllUsers(){
+    String getDescrById(int id){
         SQLiteDatabase db = getReadableDatabase();
-        Cursor query = db.rawQuery("SELECT * FROM users;", null);
-        if(query.moveToFirst()){
-            do{
-                Log.d("LOG",query.getString(0));
-                Log.d("LOG",query.getString(1));
-                Log.d("LOG",query.getString(2));
-                Log.d("LOG",query.getString(3));
-            }
-            while(query.moveToNext());
+        Cursor query = db.rawQuery("select description from "+TABLE_NAME_FORUM+" where "+KEY_ID_FORUM+" like "+id,null);
+        if(query.moveToFirst() && query.getCount() != 0){
+            return query.getString(0);
         }
+        else return "NO";
+    }
+
+    String getTitleById(int id){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor query = db.rawQuery("select title from "+TABLE_NAME_FORUM+" where "+KEY_ID_FORUM+" like "+id,null);
+        if(query.moveToFirst() && query.getCount() != 0){
+            return query.getString(0);
+        }
+        else return "NO TITLE";
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    void addComment(String comment, int id_author, int title_id){
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("comment", comment);
+        cv.put("forum_id", title_id);
+        cv.put("created_at", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        cv.put("author_id", id_author);
+        db.insert(DBHelper.TABLE_NAME_COMMENTS,null,cv);
+        cv.clear();
     }
 
     String getAuthor(int id){
@@ -227,7 +250,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 f.setAuthor_id(query.getInt(2));
                 f.setTitle(query.getString(3));
                 f.setDesc(query.getString(4));
-                f.setComment_id(query.getInt(5));
                 forums.add(f);
             }
             while(query.moveToNext());
@@ -239,7 +261,6 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(KEY_DESCRIPTION_FORUM, desc);
-        contentValues.put(KEY_COMMENT_ID_FORUM, comm_id);
         contentValues.put(KEY_CREATED_AT_FORUM, date);
         contentValues.put(KEY_TITLE_FORUM, title);
         contentValues.put(KEY_AUTHOR_ID_FORUM, author_id);

@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".add_forum"></activity>
-        <activity android:name=".VideoMaterial" />
+        <activity android:name=".ForumArticle" />
         <activity android:name=".MainActivity" />
         <activity android:name=".AuthActivity">
             <intent-filter>
