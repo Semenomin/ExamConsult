@@ -36,6 +36,7 @@ public class ForumArticle extends AppCompatActivity {
     Button send;
     int user_id;
     int forum_id;
+    int forum_author_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +53,13 @@ public class ForumArticle extends AppCompatActivity {
             Bundle arguments = getIntent().getExtras();
             user_id = arguments.getInt("id_user");
             forum_id = arguments.getInt("forum");
+            forum_author_id = arguments.getInt("forum_author_id");
             String descr = dbHelper.getDescrById(forum_id);
             textDescription.setText(descr);
             String title = dbHelper.getTitleById(forum_id);
             textTitle.setText(title);
             db.close();
-            getData();
+            getData(user_id);
         }
         catch (Exception e)
         {
@@ -82,7 +84,7 @@ public class ForumArticle extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    public void getData(){
+    public void getData(int user_id){
         try {
             dbHelper = new DBHelper(this);
             db = dbHelper.getWritableDatabase();
@@ -91,16 +93,18 @@ public class ForumArticle extends AppCompatActivity {
             if(cursor.moveToFirst()){
                 do{
                     Comments comment = new Comments();
+                    comment.setId(cursor.getInt(0));
                     comment.setComment(cursor.getString(1));
                     comment.setDate(cursor.getString(2));
-                    comment.setAuthor_id(dbHelper.getAuthor(cursor.getInt(3)));
+                    comment.setAuthor_id(String.valueOf(cursor.getInt(3)));
+                    comment.setForum_id(forum_id);
                     comments.add(comment);
                 }while (cursor.moveToNext());
             }else{
                 Toast.makeText(this, "Comment Table is Empty", Toast.LENGTH_SHORT).show();
             }
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            adapter = new AdapterComments(comments);
+            adapter = new AdapterComments(comments,ForumArticle.this,user_id,forum_author_id);
             recyclerView.setAdapter(adapter);
             cursor.close();
             db.close();
@@ -116,7 +120,7 @@ public class ForumArticle extends AppCompatActivity {
         try {
             if (edit_comment.length() > 4){
                 dbHelper.addComment(edit_comment.getText().toString(), user_id, forum_id);
-                getData();
+                getData(user_id);
             }
             else
             {

@@ -179,7 +179,6 @@ public class DBHelper extends SQLiteOpenHelper {
     void signIn(String password, String login,Context ctx) throws NoSuchAlgorithmException {
         SQLiteDatabase db = getReadableDatabase();
         Cursor query =  db.rawQuery("select * from "+TABLE_NAME_USER+" where "+KEY_LOGIN_USER+" LIKE \'"+login+"\';",null);
-        Log.d("LOG","select * from "+TABLE_NAME_USER+" where "+KEY_LOGIN_USER+" = "+login+";");
         if(query.moveToFirst() && query.getCount() != 0){
             Log.d("LOG","something");
             int id = query.getInt(0);
@@ -266,4 +265,23 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(KEY_AUTHOR_ID_FORUM, author_id);
         db.insert(TABLE_NAME_FORUM, null, contentValues);
     }
+
+    void changeForum(String newDesc,String newTitle,String forum_id){
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(KEY_DESCRIPTION_FORUM,newDesc);
+        contentValues.put(KEY_TITLE_FORUM,newTitle);
+        db.update(TABLE_NAME_FORUM,contentValues,KEY_ID_FORUM+" = ?",new String[]{forum_id});
+    }
+
+    void deleteForum(String forum_id){
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(TABLE_NAME_FORUM,KEY_ID_FORUM+" = ?",new String[]{forum_id});
+    }
+
+    void deleteComment(int comment_id){
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(TABLE_NAME_COMMENTS,KEY_ID_COMMENTS+" = ?",new String[]{String.valueOf(comment_id)});
+    }
+
 }

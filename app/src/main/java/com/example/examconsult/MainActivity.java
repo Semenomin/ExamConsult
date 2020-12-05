@@ -78,8 +78,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void click(View view) {
         Intent intent = new Intent(this,add_forum.class);
+        intent.putExtra("isEdit",false);
         intent.putExtra("id_user",user_id);
         this.startActivity(intent);
+    }
+
+
+    public void update(View view) {
+        setInitialData();
+        adapter = new RecycleAdapter(this, forums,user_id);
+        recyclerView.setAdapter(adapter);
     }
 
 }

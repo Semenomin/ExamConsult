@@ -4,16 +4,9 @@ public class Comments {
 
     private int id;
     private String author_id;
-
     private String comment;
     private String date;
-
-
-    public Comments(String comment, String date, String author_id) {
-        this.comment = comment;
-        this.date = date;
-        this.author_id = author_id;
-    }
+    private Integer forum_id;
 
     public Comments() {
     }
@@ -48,5 +41,13 @@ public class Comments {
 
     public void setAuthor_id(String author_id) {
         this.author_id = author_id;
+    }
+
+    public int getForum_id() {
+        return forum_id;
+    }
+
+    public void setForum_id(int forum_id) {
+        this.forum_id = forum_id;
     }
 }
