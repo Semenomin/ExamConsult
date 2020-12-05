@@ -23,12 +23,21 @@
         android:textSize="36sp"
         android:text="Title"/>
 
+    <TextView
+        android:id="@+id/text_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/text_title"
+        android:text="Title"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp" />
+
     <ScrollView
         android:id="@+id/scroll"
         android:layout_width="match_parent"
-        android:layout_height="420dp"
-        android:layout_below="@+id/text_title"
-        android:layout_marginTop="0dp">
+        android:layout_height="329dp"
+        android:layout_below="@+id/text_category">
 
         <TextView
             android:id="@+id/text_description"

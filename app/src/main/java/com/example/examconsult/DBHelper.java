@@ -46,7 +46,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String KEY_AUTHOR_ID_FORUM= "author_id";
     private static final String KEY_TITLE_FORUM = "title";
     private static final String KEY_DESCRIPTION_FORUM = "description";
-    private static final String KEY_COMMENT_ID_FORUM = "comment_id";
+    private static final String KEY_CATEGORY = "category";
+
 
     private static final String TABLE_NAME_COMMENTS = "comments";
     private static final String KEY_ID_COMMENTS = "id";
@@ -79,6 +80,7 @@ public class DBHelper extends SQLiteOpenHelper {
                         " "+KEY_AUTHOR_ID_FORUM+" TEXT NOT NULL,"+
                         " "+KEY_TITLE_FORUM+" TEXT UNIQUE NOT NULL,"+
                         " "+KEY_DESCRIPTION_FORUM+" TEXT NOT NULL,"+
+                        " "+KEY_CATEGORY+" TEXT NOT NULL,"+
                         " FOREIGN KEY("+KEY_AUTHOR_ID_FORUM+") REFERENCES users("+KEY_ID_USER+")"+
                         " )");
 
@@ -216,6 +218,15 @@ public class DBHelper extends SQLiteOpenHelper {
         else return "NO TITLE";
     }
 
+    String getCategoryById(int id){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor query = db.rawQuery("select category from "+TABLE_NAME_FORUM+" where "+KEY_ID_FORUM+" like "+id,null);
+        if(query.moveToFirst() && query.getCount() != 0){
+            return query.getString(0);
+        }
+        else return "NO TITLE";
+    }
+
     @SuppressLint("SimpleDateFormat")
     void addComment(String comment, int id_author, int title_id){
         SQLiteDatabase db = getWritableDatabase();
@@ -249,6 +260,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 f.setAuthor_id(query.getInt(2));
                 f.setTitle(query.getString(3));
                 f.setDesc(query.getString(4));
+                f.setCategory(query.getString(5));
                 forums.add(f);
             }
             while(query.moveToNext());
@@ -256,13 +268,14 @@ public class DBHelper extends SQLiteOpenHelper {
         return forums;
     }
 
-    void newForum(String desc,int comm_id,String date, String title, int author_id){
+    void newForum(String desc,int comm_id,String date, String title, int author_id,String category){
         SQLiteDatabase db = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(KEY_DESCRIPTION_FORUM, desc);
         contentValues.put(KEY_CREATED_AT_FORUM, date);
         contentValues.put(KEY_TITLE_FORUM, title);
         contentValues.put(KEY_AUTHOR_ID_FORUM, author_id);
+        contentValues.put(KEY_CATEGORY,category);
         db.insert(TABLE_NAME_FORUM, null, contentValues);
     }
 

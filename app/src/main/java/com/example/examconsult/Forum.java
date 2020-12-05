@@ -8,6 +8,7 @@ public class Forum {
     private String title;
     private String desc;
     private int comment_id;
+    private String category;
 
     public int getId() {
         return id;
@@ -57,4 +58,11 @@ public class Forum {
         this.comment_id = comment_id;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
 }

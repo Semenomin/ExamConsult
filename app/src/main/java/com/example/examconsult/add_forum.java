@@ -21,7 +21,7 @@ import java.util.Date;
 
 public class add_forum extends AppCompatActivity {
 
-    EditText title, desc;
+    EditText title, desc,category;
     String date;
     int user_id;
     boolean isEdit;
@@ -34,6 +34,7 @@ public class add_forum extends AppCompatActivity {
         setContentView(R.layout.activity_add_forum);
         title = findViewById(R.id.title_edit);
         desc = findViewById(R.id.desc_edit);
+        category = findViewById(R.id.category_edit);
         Bundle arguments = getIntent().getExtras();
         isEdit = arguments.getBoolean("isEdit");
         user_id = arguments.getInt("id_user");
@@ -44,6 +45,7 @@ public class add_forum extends AppCompatActivity {
             title.setText(arguments.getString("title"));
             desc.setText(arguments.getString("desc"));
             forum_id = arguments.getInt("id");
+            category.setText(arguments.getString("category"));
         }
         try {
             ImageView userAva;
@@ -79,7 +81,7 @@ public class add_forum extends AppCompatActivity {
                 }else{
                     String desc = this.desc.getText().toString();
                     String title = this.title.getText().toString();
-                    help.newForum(desc, 100, date, title, user_id);
+                    help.newForum(desc, 100, date, title, user_id,category.getText().toString());
                     Intent intent = new Intent(this, MainActivity.class);
                     intent.putExtra("id_user", user_id);
                     this.startActivity(intent);

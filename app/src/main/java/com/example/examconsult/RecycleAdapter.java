@@ -84,6 +84,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.ViewHold
                         intent.putExtra("title",forum.getTitle());
                         intent.putExtra("desc",forum.getDesc());
                         intent.putExtra("id",forum.getId());
+                        intent.putExtra("category",forum.getCategory());
                         mainContext.startActivity(intent);
                     }
                 }).setNeutralButton("Удалить", new DialogInterface.OnClickListener() {

@@ -32,7 +32,7 @@ public class ForumArticle extends AppCompatActivity {
     DBHelper dbHelper;
     EditText edit_comment;
     TextView textDescription;
-    TextView textTitle;
+    TextView textTitle,textCategory;
     Button send;
     int user_id;
     int forum_id;
@@ -47,6 +47,7 @@ public class ForumArticle extends AppCompatActivity {
             recyclerView = findViewById(R.id.recycle_view);
             textDescription = findViewById(R.id.text_description);
             textTitle = findViewById(R.id.text_title);
+            textCategory = findViewById(R.id.text_category);
             DBHelper dbHelper = new DBHelper(this);
             db = dbHelper.getWritableDatabase();
 
@@ -58,6 +59,7 @@ public class ForumArticle extends AppCompatActivity {
             textDescription.setText(descr);
             String title = dbHelper.getTitleById(forum_id);
             textTitle.setText(title);
+            textCategory.setText(dbHelper.getCategoryById(forum_id));
             db.close();
             getData(user_id);
         }
