@@ -104,6 +104,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void addUser(String login,String password,int isAdmin ,Context ctx) {
+        User user = new User();
         try {
             if(login.length() >=4){
                 if(password.length() >=4){
@@ -112,12 +113,15 @@ public class DBHelper extends SQLiteOpenHelper {
                     if(readFile(ctx)==null){
                         byte[] sa = getSalt();
                         pass = new String(getHash(sa,password));
-                        writeFile(sa,ctx);
+                        user.salt = sa;
                     }
                     else{
-                        byte[]salt = readFile(ctx);
-                        pass = new String(getHash(salt,password));
+                        user = SerealizationManager.readSerializable(ctx,"user");
+                        pass = new String(getHash(user.salt,password));
                     }
+                    user.login = login;
+                    user.password = password;
+                    SerealizationManager.saveSerializable(ctx,user,"user");
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(KEY_LOGIN_USER, login);
                     contentValues.put(KEY_PASSWORD_USER, pass);
@@ -185,9 +189,9 @@ public class DBHelper extends SQLiteOpenHelper {
             Log.d("LOG","something");
             int id = query.getInt(0);
             String pass = query.getString(2);
-            byte[] salt = readFile(ctx);
-            if(salt != null){
-                String pass_input = new String(getHash(salt,password));
+            User user = SerealizationManager.readSerializable(ctx,"user");
+            if(user.salt != null){
+                String pass_input = new String(getHash(user.salt,password));
                 if(pass.equals(pass_input)){
                     Intent intent = new Intent(ctx, MainActivity.class);
                     intent.putExtra("id_user",id);
